@@ -1,0 +1,134 @@
+.game-container {
+  position: relative;
+  background: #0d0d1a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 0 60px rgba(0, 150, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ui-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 16px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.stats span {
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.tower-select {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tower-btn {
+  padding: 8px 16px;
+  background: rgba(0, 150, 255, 0.2);
+  border: 2px solid rgba(0, 150, 255, 0.5);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.tower-btn:hover {
+  background: rgba(0, 150, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.tower-btn.active {
+  background: rgba(0, 200, 100, 0.3);
+  border-color: #00c853;
+  box-shadow: 0 0 12px rgba(0, 200, 100, 0.3);
+}
+
+.btn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #00c853, #00a844);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 200, 100, 0.4);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.canvas-wrap {
+  position: relative;
+}
+
+.game-canvas {
+  display: block;
+  background: #0a0a12;
+  border-radius: 8px;
+  cursor: crosshair;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.overlay-content h2 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #00c853, #00b8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.overlay-content p {
+  margin-bottom: 24px;
+  color: #aaa;
+}
+
+.overlay.victory .overlay-content h2 {
+  background: linear-gradient(90deg, #00c853, #69f0ae);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.overlay.defeat .overlay-content h2 {
+  background: linear-gradient(90deg, #ff5252, #ff8a80);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
