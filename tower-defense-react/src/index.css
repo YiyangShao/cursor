@@ -12,8 +12,8 @@ html, body {
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
-  color: #e8e8e8;
+  background: linear-gradient(135deg, #fff5f7 0%, #fce4ec 40%, #f3e5f5 80%, #e8eaf6 100%);
+  color: #4a148c;
 }
 
 #root {

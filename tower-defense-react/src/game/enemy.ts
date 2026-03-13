@@ -8,13 +8,15 @@ export interface EnemyTypeConfig {
   reward: number;
   color: string;
   radius: number;
+  /** 可爱风格外观：emoji 或绘制用标识 */
+  sprite: string;
 }
 
 export const ENEMY_LABELS: Record<EnemyTypeKey, string> = {
-  goblin: '哥布林',
-  wolf: '狼',
-  tank: '坦克',
-  boss: 'Boss',
+  goblin: '小猫咪',
+  wolf: '小松鼠',
+  tank: '小狗狗',
+  boss: '大熊猫',
 };
 
 export const ENEMY_TYPES: Record<EnemyTypeKey, EnemyTypeConfig> = {
@@ -22,29 +24,33 @@ export const ENEMY_TYPES: Record<EnemyTypeKey, EnemyTypeConfig> = {
     hp: 100,
     speed: 0.00015,
     reward: 15,
-    color: '#4caf50',
+    color: '#ffb74d',
     radius: 14,
+    sprite: '🐱',
   },
   wolf: {
     hp: 60,
     speed: 0.00028,
     reward: 25,
-    color: '#9c27b0',
+    color: '#8d6e63',
     radius: 12,
+    sprite: '🐿️',
   },
   tank: {
     hp: 300,
     speed: 0.00008,
     reward: 40,
-    color: '#795548',
+    color: '#ffb74d',
     radius: 18,
+    sprite: '🐕',
   },
   boss: {
     hp: 800,
     speed: 0.0001,
     reward: 150,
-    color: '#d32f2f',
+    color: '#546e7a',
     radius: 24,
+    sprite: '🐼',
   },
 };
 
@@ -58,6 +64,7 @@ export class Enemy {
   reward: number;
   color: string;
   radius: number;
+  sprite: string;
   progress: number;
   alive: boolean;
   rewarded: boolean;
@@ -74,6 +81,7 @@ export class Enemy {
     this.reward = Math.floor(config.reward * rewardMult);
     this.color = config.color;
     this.radius = config.radius;
+    this.sprite = config.sprite;
     this.progress = 0;
     this.alive = true;
     this.rewarded = false;

@@ -1,11 +1,12 @@
 import type { Tower } from '../game/tower';
-import { TOWER_TYPES } from '../game/tower';
+import { getTowerIconAtLevel } from '../game/tower';
+import { towerSpriteSrc } from '../game/assets';
 
 const TOWER_NAMES: Record<string, string> = {
-  arrow: '箭塔',
-  cannon: '炮塔',
-  slow: '减速塔',
-  mage: '法师塔',
+  arrow: '冰淇淋筒',
+  cannon: '奶油炮',
+  slow: '棉花糖塔',
+  mage: '马卡龙法师',
 };
 
 interface TowerDetailPanelProps {
@@ -16,13 +17,24 @@ interface TowerDetailPanelProps {
 }
 
 export function TowerDetailPanel({ tower, gold, onUpgrade, onSell }: TowerDetailPanelProps) {
-  const cfg = TOWER_TYPES[tower.type];
   const canUpgrade = tower.level < 3 && gold >= tower.upgradeCost;
 
   return (
     <div className="tower-detail-panel">
       <div className="tower-detail-header">
-        <span className="tower-detail-icon">{cfg.icon}</span>
+        <span className="tower-detail-icon">
+          <img
+            src={towerSpriteSrc(tower.type, tower.level)}
+            alt=""
+            onError={(e) => {
+              const el = e.currentTarget;
+              el.style.display = 'none';
+              const fb = el.nextElementSibling as HTMLElement | null;
+              if (fb) fb.style.display = 'inline';
+            }}
+          />
+          <span className="tower-icon-fallback" style={{ display: 'none' }}>{getTowerIconAtLevel(tower.type, tower.level)}</span>
+        </span>
         <span className="tower-detail-name">{TOWER_NAMES[tower.type]} Lv{tower.level}</span>
       </div>
       <div className="tower-detail-stats">

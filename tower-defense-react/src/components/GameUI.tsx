@@ -1,26 +1,22 @@
 import type { GameState } from '../game/game';
 import { TOWER_TYPES, getTowerCost, type TowerTypeKey } from '../game/tower';
+import { towerSpriteSrc, enemySpriteSrc } from '../game/assets';
 import { ENEMY_LABELS } from '../game/enemy';
 import type { EnemyTypeKey } from '../game/enemy';
 import { SKILL_COST, WAVE_BONUS } from '../game/config';
 
 const TOWER_NAMES: Record<TowerTypeKey, string> = {
-  arrow: '箭塔',
-  cannon: '炮塔',
-  slow: '减速塔',
-  mage: '法师塔',
+  arrow: '冰淇淋筒',
+  cannon: '奶油炮',
+  slow: '棉花糖塔',
+  mage: '马卡龙法师',
 };
 
-const ENEMY_ICONS: Record<EnemyTypeKey, string> = {
-  goblin: '🟢',
-  wolf: '🟣',
-  tank: '🟤',
-  boss: 'Boss',
-};
 
 interface GameUIProps {
   state: GameState;
   selectedTower: TowerTypeKey;
+  allowedTowers: TowerTypeKey[];
   onSelectTower: (t: TowerTypeKey) => void;
   onStartWave: () => void;
   onPause: () => void;
@@ -32,6 +28,7 @@ interface GameUIProps {
 export function GameUI({
   state,
   selectedTower,
+  allowedTowers,
   onSelectTower,
   onStartWave,
   onPause,
@@ -55,12 +52,12 @@ export function GameUI({
   return (
     <div className="ui-panel">
       <div className="stats">
-        <div className="stat-item">💰 {state.gold}</div>
+        <div className="stat-item"><span className="stat-label">金币</span> {state.gold}</div>
         <div className={`stat-item ${state.lives <= 5 ? 'lives-low' : ''}`}>
-          ❤️ {state.lives}
+          <span className="stat-label">生命</span> {state.lives}
         </div>
         <div className="stat-item">
-          🌊 {state.wave}/{totalWaves === Infinity ? '∞' : totalWaves}
+          <span className="stat-label">波次</span> {state.wave}/{totalWaves === Infinity ? '∞' : totalWaves}
           {state.waveQueue > 0 && (
             <span style={{ marginLeft: 4, opacity: 0.8 }}>
               ({state.totalInWave - state.waveQueue}/{state.totalInWave})
@@ -70,8 +67,8 @@ export function GameUI({
       </div>
 
       {nextWave.length > 0 && canStart && (
-        <div className="next-wave-preview" title={`完成波次可获得 +${WAVE_BONUS}💰`}>
-          <span className="preview-label">下一波 (+{WAVE_BONUS}💰):</span>
+        <div className="next-wave-preview" title={`完成波次可获得 +${WAVE_BONUS} 金币`}>
+          <span className="preview-label">下一波 (+{WAVE_BONUS}):</span>
           <span className="preview-icons">
             {Object.entries(
               nextWave.reduce((m: Record<string, number>, t) => {
@@ -85,7 +82,8 @@ export function GameUI({
                 className="preview-icon"
                 style={{ backgroundColor: getEnemyColor(type) + '40' }}
               >
-                {n > 1 ? `${ENEMY_ICONS[type as EnemyTypeKey]}×${n}` : ENEMY_ICONS[type as EnemyTypeKey]}
+                <img src={enemySpriteSrc(type as EnemyTypeKey)} alt="" className="preview-enemy-icon" onError={(e) => { const el = e.currentTarget; el.style.display = 'none'; const fb = el.nextElementSibling as HTMLElement | null; if (fb) fb.style.display = 'inline'; }} />
+                <span className="preview-enemy-fallback" style={{ display: 'none' }}>{n > 1 ? `${n}×` : ''}{ENEMY_LABELS[type as EnemyTypeKey]}</span>
               </span>
             ))}
           </span>
@@ -107,7 +105,7 @@ export function GameUI({
           disabled={!!state.gameOver}
           title={state.paused ? '继续' : '暂停'}
         >
-          {state.paused ? '▶ 继续' : '⏸ 暂停'}
+          {state.paused ? '继续' : '暂停'}
         </button>
         <button
           className="btn btn-secondary"
@@ -121,22 +119,22 @@ export function GameUI({
           className="btn btn-skill"
           onClick={onSkillFreeze}
           disabled={!state.skillFreezeReady}
-          title={`冰冻全场 3秒 ${SKILL_COST}💰`}
+          title={`冰冻全场 3秒 ${SKILL_COST} 金币`}
         >
-          ❄️ 冰冻 {state.skillFreezeCooldown > 0 ? `${Math.ceil(state.skillFreezeCooldown / 1000)}s` : ''}
+          冰冻 {state.skillFreezeCooldown > 0 ? `${Math.ceil(state.skillFreezeCooldown / 1000)}s` : ''}
         </button>
         <button
           className="btn btn-skill"
           onClick={onSkillNuke}
           disabled={!state.skillNukeReady}
-          title={`全屏200伤害 ${SKILL_COST}💰`}
+          title={`全屏200伤害 ${SKILL_COST} 金币`}
         >
-          💥 爆破 {state.skillNukeCooldown > 0 ? `${Math.ceil(state.skillNukeCooldown / 1000)}s` : ''}
+          爆破 {state.skillNukeCooldown > 0 ? `${Math.ceil(state.skillNukeCooldown / 1000)}s` : ''}
         </button>
       </div>
 
       <div className="tower-select">
-        {(Object.keys(TOWER_TYPES) as TowerTypeKey[]).map((key) => {
+        {allowedTowers.map((key) => {
           const cfg = TOWER_TYPES[key];
           const cost = getTowerCost(key, 1);
           const insufficient = state.gold < cost;
@@ -145,11 +143,17 @@ export function GameUI({
               key={key}
               className={`tower-btn ${selectedTower === key ? 'active' : ''} ${insufficient ? 'insufficient' : ''}`}
               onClick={() => onSelectTower(key)}
-              title={`${cfg.icon} ${TOWER_NAMES[key]} | ${cost}💰 | 伤害${cfg.base.damage} | 射程${cfg.base.range}`}
+              title={`${TOWER_NAMES[key]} | ${cost} 金币 | 伤害${cfg.base.damage} | 射程${cfg.base.range}`}
             >
-              {cfg.icon} {TOWER_NAMES[key]}
+              <img
+                src={towerSpriteSrc(key, 1)}
+                alt=""
+                className="tower-btn-icon"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+              {TOWER_NAMES[key]}
               <span className={`cost ${insufficient ? 'insufficient' : ''}`}>
-                {cost}💰
+                {cost}
               </span>
             </button>
           );
@@ -165,10 +169,10 @@ export function GameUI({
 
 function getEnemyColor(type: string): string {
   const colors: Record<string, string> = {
-    goblin: '#4caf50',
-    wolf: '#9c27b0',
-    tank: '#795548',
-    boss: '#d32f2f',
+    goblin: '#ffb74d',
+    wolf: '#8d6e63',
+    tank: '#ffb74d',
+    boss: '#546e7a',
   };
   return colors[type] ?? '#888';
 }

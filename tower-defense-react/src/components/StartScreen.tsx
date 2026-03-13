@@ -48,14 +48,15 @@ export function StartScreen({ settings, onSettingsChange, onStart }: StartScreen
           </div>
           <div className="option-group">
             <label>地图</label>
-            <div className="option-buttons map-buttons">
-              {Object.values(MAPS).map((m) => (
+            <div className="map-grid">
+              {Object.values(MAPS).map((m, i) => (
                 <button
                   key={m.id}
-                  className={`option-btn map-btn ${settings.mapId === m.id ? 'active' : ''}`}
+                  className={`map-card ${settings.mapId === m.id ? 'active' : ''}`}
                   onClick={() => onSettingsChange({ ...settings, mapId: m.id })}
+                  title={m.name}
                 >
-                  {m.name}
+                  {i + 1}
                 </button>
               ))}
             </div>

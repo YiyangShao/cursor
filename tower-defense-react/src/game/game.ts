@@ -11,7 +11,6 @@ import {
   updateParticle,
   type Particle,
 } from './particles';
-import { createDamageText, updateDamageText, type DamageText } from './damageText';
 import * as sound from './sound';
 import {
   MAPS,
@@ -63,7 +62,6 @@ export class Game {
   towers: Tower[] = [];
   projectiles: import('./projectile').Projectile[] = [];
   particles: Particle[] = [];
-  damageTexts: DamageText[] = [];
   enemyId = 0;
   towerId = 0;
   waveQueue: EnemyTypeKey[] = [];
@@ -155,7 +153,6 @@ export class Game {
     this.towers = [];
     this.projectiles = [];
     this.particles = [];
-    this.damageTexts = [];
     this.enemyId = 0;
     this.towerId = 0;
     this.waveQueue = [];
@@ -204,8 +201,6 @@ export class Game {
     for (const e of this.enemies) {
       if (e.alive) {
         e.takeDamage(SKILL_NUKE_DAMAGE);
-        const pos = e.getPosition();
-        this.damageTexts.push(createDamageText(pos.x, pos.y, SKILL_NUKE_DAMAGE));
         if (!e.alive) {
           this.gold += e.claimReward();
           const pos = e.getPosition();
@@ -252,7 +247,6 @@ export class Game {
         const falloff = 1 - (d / radius) * 0.5;
         const actualDmg = Math.floor(damage * falloff);
         e.takeDamage(actualDmg);
-        this.damageTexts.push(createDamageText(pos.x, pos.y, actualDmg));
         if (!e.alive) {
           this.gold += e.claimReward();
           this.particles.push(...createDeathParticles(pos.x, pos.y, e.color));
@@ -326,7 +320,6 @@ export class Game {
           : undefined;
       if (p.update(scaledDt, onSplash)) {
         if (!p.splashRadius && p.hit) {
-          this.damageTexts.push(createDamageText(p.x, p.y, p.damage));
           this.particles.push(...createHitParticles(p.x, p.y));
           sound.playHit();
         }
@@ -339,12 +332,6 @@ export class Game {
         this.particles.splice(i, 1);
       }
     }
-    for (let i = this.damageTexts.length - 1; i >= 0; i--) {
-      if (!updateDamageText(this.damageTexts[i], dt)) {
-        this.damageTexts.splice(i, 1);
-      }
-    }
-
     if (this.playing && this.waveQueue.length === 0 && this.enemies.every((e) => !e.alive)) {
       const isEndless = this.settings.mode === 'endless';
       if (!isEndless && this.wave >= this.waves.length) {
@@ -366,6 +353,9 @@ export class Game {
   }
 
   tryPlaceTower(typeKey: TowerTypeKey, cellX: number, cellY: number): boolean {
+    const map = MAPS[this.settings.mapId];
+    const allowed = map?.allowedTowers ?? ['arrow', 'cannon', 'slow', 'mage'];
+    if (!allowed.includes(typeKey)) return false;
     const cell = screenToCell(cellX, cellY);
     if (!cell || !canPlaceTower(cell.col, cell.row)) return false;
     const cost = getTowerCost(typeKey, 1);

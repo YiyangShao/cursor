@@ -14,6 +14,8 @@ export interface ProjectileConfig {
 export class Projectile {
   x: number;
   y: number;
+  originX: number;
+  originY: number;
   target: Enemy | null;
   damage: number;
   speed: number;
@@ -31,6 +33,8 @@ export class Projectile {
   ) {
     this.x = x;
     this.y = y;
+    this.originX = x;
+    this.originY = y;
     this.target = target;
     this.damage = config.damage;
     this.speed = config.speed;

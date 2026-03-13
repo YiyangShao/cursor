@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { Game } from './game/game';
 import { GameCanvas } from './components/GameCanvas';
 import { GameUI } from './components/GameUI';
@@ -7,7 +7,7 @@ import { StartScreen } from './components/StartScreen';
 import { TutorialOverlay } from './components/TutorialOverlay';
 import { TowerDetailPanel } from './components/TowerDetailPanel';
 import { SettingsModal } from './components/SettingsModal';
-import { loadSettings, saveSettings, loadScores } from './game/config';
+import { loadSettings, saveSettings, loadScores, MAPS } from './game/config';
 import type { TowerTypeKey } from './game/tower';
 import type { GameSettings } from './game/config';
 import './App.css';
@@ -120,6 +120,17 @@ function App() {
   const selectedTowerData = selectedCell ? game.getTowerAt(selectedCell.x, selectedCell.y) : null;
   const showTutorial = gameStarted && !tutorialSkipped && tutorialStep < 4;
 
+  const allowedTowers = useMemo(
+    () => (MAPS[settings.mapId]?.allowedTowers ?? ['arrow', 'cannon', 'slow', 'mage']) as TowerTypeKey[],
+    [settings.mapId]
+  );
+
+  useEffect(() => {
+    if (!allowedTowers.includes(selectedTower)) {
+      setSelectedTower(allowedTowers[0] ?? 'arrow');
+    }
+  }, [allowedTowers, selectedTower]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -145,13 +156,15 @@ function App() {
         return;
       }
       if (e.key >= '1' && e.key <= '4') {
-        const keys: TowerTypeKey[] = ['arrow', 'cannon', 'slow', 'mage'];
-        setSelectedTower(keys[parseInt(e.key) - 1]);
+        const idx = parseInt(e.key) - 1;
+        if (idx < allowedTowers.length) {
+          setSelectedTower(allowedTowers[idx]);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameStarted, overlay, state.waveQueue, state.aliveCount, state.wave, state.totalWaves, game]);
+  }, [gameStarted, overlay, state.waveQueue, state.aliveCount, state.wave, state.totalWaves, game, allowedTowers]);
 
   if (!gameStarted) {
     return (
@@ -177,6 +190,7 @@ function App() {
       <GameUI
         state={state}
         selectedTower={selectedTower}
+        allowedTowers={allowedTowers}
         onSelectTower={(t) => { setSelectedTower(t); setSelectedCell(null); }}
         onStartWave={handleStartWave}
         onPause={handlePause}
@@ -227,6 +241,10 @@ function App() {
           settings={settings}
           onSave={(s) => { setSettings(s); handleNewGameWithSettings(s); setShowSettings(false); }}
           onClose={() => setShowSettings(false)}
+          onReturnHome={() => {
+            setShowSettings(false);
+            setGameStarted(false);
+          }}
         />
       )}
     </div>

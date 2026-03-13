@@ -21,6 +21,10 @@ export interface TowerTypeConfig {
   color: string;
   radius: number;
   icon: string;
+  /** 1-3级外观：越来越霸气 */
+  iconL1: string;
+  iconL2: string;
+  iconL3: string;
   effect?: 'slow' | 'splash';
   effectValue?: number;
   effectDuration?: number;
@@ -48,6 +52,9 @@ export const TOWER_TYPES: Record<TowerTypeKey, TowerTypeConfig> = {
     color: '#2196f3',
     radius: 22,
     icon: '🏹',
+    iconL1: '🏹',
+    iconL2: '🎯',
+    iconL3: '⚔️',
   },
   cannon: {
     base: cannonBase,
@@ -56,6 +63,9 @@ export const TOWER_TYPES: Record<TowerTypeKey, TowerTypeConfig> = {
     color: '#ff9800',
     radius: 24,
     icon: '💣',
+    iconL1: '💣',
+    iconL2: '🔥',
+    iconL3: '💥',
     splashRadius: 60,
   },
   slow: {
@@ -65,6 +75,9 @@ export const TOWER_TYPES: Record<TowerTypeKey, TowerTypeConfig> = {
     color: '#00bcd4',
     radius: 22,
     icon: '❄️',
+    iconL1: '❄️',
+    iconL2: '🧊',
+    iconL3: '🌨️',
     effect: 'slow',
     effectValue: 0.4,
     effectDuration: 2000,
@@ -76,6 +89,9 @@ export const TOWER_TYPES: Record<TowerTypeKey, TowerTypeConfig> = {
     color: '#9c27b0',
     radius: 23,
     icon: '🔮',
+    iconL1: '🔮',
+    iconL2: '✨',
+    iconL3: '🌟',
   },
 };
 
@@ -98,6 +114,12 @@ export function getTowerSellValue(type: TowerTypeKey, level: number): number {
   return getStatsAtLevel(type, level).sellValue;
 }
 
+export function getTowerIconAtLevel(type: TowerTypeKey, level: number): string {
+  const cfg = TOWER_TYPES[type];
+  if (!cfg) return '?';
+  return level === 1 ? cfg.iconL1 : level === 2 ? cfg.iconL2 : cfg.iconL3;
+}
+
 export class Tower {
   type: TowerTypeKey;
   id: number;
@@ -110,6 +132,9 @@ export class Tower {
   color: string;
   radius: number;
   icon: string;
+  iconL1: string;
+  iconL2: string;
+  iconL3: string;
   effect?: 'slow' | 'splash';
   effectValue?: number;
   effectDuration?: number;
@@ -133,6 +158,9 @@ export class Tower {
     this.color = cfg.color;
     this.radius = cfg.radius;
     this.icon = cfg.icon;
+    this.iconL1 = cfg.iconL1;
+    this.iconL2 = cfg.iconL2;
+    this.iconL3 = cfg.iconL3;
     this.effect = cfg.effect;
     this.effectValue = cfg.effectValue;
     this.effectDuration = cfg.effectDuration;

@@ -14,9 +14,10 @@ interface SettingsModalProps {
   settings: GameSettings;
   onSave: (s: GameSettings) => void;
   onClose: () => void;
+  onReturnHome?: () => void;
 }
 
-export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps) {
+export function SettingsModal({ settings, onSave, onClose, onReturnHome }: SettingsModalProps) {
   const [local, setLocal] = useState(settings);
   const scores = loadScores();
 
@@ -61,8 +62,8 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
             value={local.mapId}
             onChange={(e) => setLocal((s) => ({ ...s, mapId: e.target.value as MapId }))}
           >
-            {Object.entries(MAPS).map(([id, m]) => (
-              <option key={id} value={id}>{m.name}</option>
+            {Object.entries(MAPS).map(([id, m], i) => (
+              <option key={id} value={id} title={m.name}>{i + 1}</option>
             ))}
           </select>
         </div>
@@ -86,6 +87,12 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
         <div className="modal-actions">
           <button className="btn" onClick={() => onSave(local)}>应用并新局</button>
           <button className="btn btn-secondary" onClick={onClose}>取消</button>
+          {onReturnHome && (
+            <>
+              <button className="btn btn-secondary" onClick={onReturnHome}>回到主页</button>
+              <button className="btn btn-secondary" onClick={onClose}>退出</button>
+            </>
+          )}
         </div>
       </div>
     </div>

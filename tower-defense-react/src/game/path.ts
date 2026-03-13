@@ -85,6 +85,10 @@ export function getPathPosition(progress: number): Point {
   return points[points.length - 1];
 }
 
-export function getMapDecorations(): { col: number; row: number; type: 'grass' | 'stone' }[] {
+export function getMapDecorations(): { col: number; row: number; type: 'grass' | 'stone' | 'flower' }[] {
   return currentMap?.decorations ?? [];
+}
+
+export function getCurrentMap(): MapConfig | null {
+  return currentMap;
 }
