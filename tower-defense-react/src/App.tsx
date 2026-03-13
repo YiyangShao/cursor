@@ -120,6 +120,39 @@ function App() {
   const selectedTowerData = selectedCell ? game.getTowerAt(selectedCell.x, selectedCell.y) : null;
   const showTutorial = gameStarted && !tutorialSkipped && tutorialStep < 4;
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'Escape') {
+        setSelectedCell(null);
+        if (showSettings) setShowSettings(false);
+        return;
+      }
+      if (!gameStarted || overlay) return;
+      if (e.key === ' ') {
+        e.preventDefault();
+        if (state.waveQueue === 0 && state.aliveCount === 0 && (state.totalWaves === Infinity || state.wave < state.totalWaves)) {
+          game.startWave();
+        }
+        return;
+      }
+      if (e.key === 'p' || e.key === 'P') {
+        game.togglePause();
+        return;
+      }
+      if (e.key === 's' || e.key === 'S') {
+        game.setSpeed(game.speed === 1 ? 2 : 1);
+        return;
+      }
+      if (e.key >= '1' && e.key <= '4') {
+        const keys: TowerTypeKey[] = ['arrow', 'cannon', 'slow', 'mage'];
+        setSelectedTower(keys[parseInt(e.key) - 1]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameStarted, overlay, state.waveQueue, state.aliveCount, state.wave, state.totalWaves, game]);
+
   if (!gameStarted) {
     return (
       <StartScreen
@@ -134,6 +167,9 @@ function App() {
     <div className="game-container">
       <header className="game-header">
         <h1 className="game-title">塔防小游戏</h1>
+        <div className="shortcut-hint" title="1-4 选塔 | 空格 波次 | P 暂停 | S 倍速 | Esc 取消">
+          ⌨️
+        </div>
         <button className="btn-icon" onClick={() => setShowSettings(true)} title="设置">
           ⚙️
         </button>

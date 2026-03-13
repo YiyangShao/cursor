@@ -11,10 +11,12 @@ import {
   updateParticle,
   type Particle,
 } from './particles';
+import { createDamageText, updateDamageText, type DamageText } from './damageText';
 import * as sound from './sound';
 import {
   MAPS,
   getWavesForDifficulty,
+  getWaveForEndless,
   DIFFICULTIES,
   SKILL_COST,
   SKILL_FREEZE_DURATION,
@@ -61,6 +63,7 @@ export class Game {
   towers: Tower[] = [];
   projectiles: import('./projectile').Projectile[] = [];
   particles: Particle[] = [];
+  damageTexts: DamageText[] = [];
   enemyId = 0;
   towerId = 0;
   waveQueue: EnemyTypeKey[] = [];
@@ -85,7 +88,7 @@ export class Game {
 
   constructor(settings: GameSettings) {
     this.settings = settings;
-    this.waves = getWavesForDifficulty(settings.difficulty);
+    this.waves = settings.mode === 'endless' ? [] : getWavesForDifficulty(settings.difficulty);
     const diff = DIFFICULTIES[settings.difficulty];
     this.gold = diff.initialGold;
     this.lives = diff.initialLives;
@@ -103,13 +106,16 @@ export class Game {
   }
 
   getState(): GameState {
-    const total = this.waves[this.wave - 1]?.length ?? 0;
+    const currentWaveEnemies = this.settings.mode === 'endless'
+      ? getWaveForEndless(this.settings.difficulty, this.wave - 1)
+      : this.waves[this.wave - 1];
+    const total = currentWaveEnemies?.length ?? 0;
     const now = Date.now();
     return {
       gold: this.gold,
       lives: this.lives,
       wave: this.wave,
-      totalWaves: this.waves.length,
+      totalWaves: this.settings.mode === 'endless' ? Infinity : this.waves.length,
       waveQueue: this.waveQueue.length,
       totalInWave: total,
       aliveCount: this.enemies.filter((e) => e.alive).length,
@@ -120,7 +126,9 @@ export class Game {
       skillNukeReady: this.gold >= SKILL_COST && now - this.skillNukeLastUse >= SKILL_CD_MS,
       skillFreezeCooldown: Math.max(0, SKILL_CD_MS - (now - this.skillFreezeLastUse)),
       skillNukeCooldown: Math.max(0, SKILL_CD_MS - (now - this.skillNukeLastUse)),
-      nextWave: this.wave < this.waves.length ? this.waves[this.wave] ?? [] : [],
+      nextWave: this.settings.mode === 'endless'
+        ? getWaveForEndless(this.settings.difficulty, this.wave)
+        : (this.wave < this.waves.length ? this.waves[this.wave] ?? [] : []),
       totalKills: this.totalKills,
       waveBonuses: this.waveBonuses,
       startTime: this.startTime,
@@ -131,7 +139,7 @@ export class Game {
   reset(settings?: GameSettings): void {
     if (settings) this.settings = settings;
     sound.setSoundEnabled(this.settings.soundEnabled);
-    this.waves = getWavesForDifficulty(this.settings.difficulty);
+    this.waves = this.settings.mode === 'endless' ? [] : getWavesForDifficulty(this.settings.difficulty);
     const diff = DIFFICULTIES[this.settings.difficulty];
     this.gold = diff.initialGold;
     this.lives = diff.initialLives;
@@ -147,6 +155,7 @@ export class Game {
     this.towers = [];
     this.projectiles = [];
     this.particles = [];
+    this.damageTexts = [];
     this.enemyId = 0;
     this.towerId = 0;
     this.waveQueue = [];
@@ -195,6 +204,8 @@ export class Game {
     for (const e of this.enemies) {
       if (e.alive) {
         e.takeDamage(SKILL_NUKE_DAMAGE);
+        const pos = e.getPosition();
+        this.damageTexts.push(createDamageText(pos.x, pos.y, SKILL_NUKE_DAMAGE));
         if (!e.alive) {
           this.gold += e.claimReward();
           const pos = e.getPosition();
@@ -212,7 +223,8 @@ export class Game {
     if (this.gameOver) return;
     if (this.waveQueue.length > 0) return;
     this.wave++;
-    if (this.wave > this.waves.length) {
+    const isEndless = this.settings.mode === 'endless';
+    if (!isEndless && this.wave > this.waves.length) {
       this.gameOver = 'victory';
       sound.playVictory();
       const scores = loadScores();
@@ -222,7 +234,10 @@ export class Game {
       this.emitState();
       return;
     }
-    this.waveQueue = [...this.waves[this.wave - 1]];
+    const waveData = isEndless
+      ? getWaveForEndless(this.settings.difficulty, this.wave - 1)
+      : (this.waves[this.wave - 1] ?? []);
+    this.waveQueue = [...waveData];
     this.playing = true;
     sound.playWaveStart();
     this.emitState();
@@ -235,7 +250,9 @@ export class Game {
       const d = distance(x, y, pos.x, pos.y);
       if (d < radius) {
         const falloff = 1 - (d / radius) * 0.5;
-        e.takeDamage(Math.floor(damage * falloff));
+        const actualDmg = Math.floor(damage * falloff);
+        e.takeDamage(actualDmg);
+        this.damageTexts.push(createDamageText(pos.x, pos.y, actualDmg));
         if (!e.alive) {
           this.gold += e.claimReward();
           this.particles.push(...createDeathParticles(pos.x, pos.y, e.color));
@@ -309,6 +326,7 @@ export class Game {
           : undefined;
       if (p.update(scaledDt, onSplash)) {
         if (!p.splashRadius && p.hit) {
+          this.damageTexts.push(createDamageText(p.x, p.y, p.damage));
           this.particles.push(...createHitParticles(p.x, p.y));
           sound.playHit();
         }
@@ -321,9 +339,15 @@ export class Game {
         this.particles.splice(i, 1);
       }
     }
+    for (let i = this.damageTexts.length - 1; i >= 0; i--) {
+      if (!updateDamageText(this.damageTexts[i], dt)) {
+        this.damageTexts.splice(i, 1);
+      }
+    }
 
     if (this.playing && this.waveQueue.length === 0 && this.enemies.every((e) => !e.alive)) {
-      if (this.wave >= this.waves.length) {
+      const isEndless = this.settings.mode === 'endless';
+      if (!isEndless && this.wave >= this.waves.length) {
         this.gameOver = 'victory';
         sound.playVictory();
         const scores = loadScores();

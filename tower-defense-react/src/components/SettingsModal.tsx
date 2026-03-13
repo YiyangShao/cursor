@@ -3,6 +3,7 @@ import {
   type GameSettings,
   type DifficultyKey,
   type MapId,
+  type GameMode,
   MAPS,
   ACHIEVEMENTS,
   loadAchievements,
@@ -42,6 +43,16 @@ export function SettingsModal({ settings, onSave, onClose }: SettingsModalProps)
             <option value="easy">简单</option>
             <option value="normal">普通</option>
             <option value="hard">困难</option>
+          </select>
+        </div>
+        <div className="modal-section">
+          <label>模式</label>
+          <select
+            value={local.mode}
+            onChange={(e) => setLocal((s) => ({ ...s, mode: e.target.value as GameMode }))}
+          >
+            <option value="campaign">关卡</option>
+            <option value="endless">无尽</option>
           </select>
         </div>
         <div className="modal-section">

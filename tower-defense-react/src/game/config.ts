@@ -138,12 +138,30 @@ const BASE_WAVES: EnemyTypeKey[][] = [
 
 export function getWavesForDifficulty(d: DifficultyKey): EnemyTypeKey[][] {
   const cfg = DIFFICULTIES[d];
-  const count = cfg.waveCount;
   const waves: EnemyTypeKey[][] = [];
-  for (let i = 0; i < count; i++) {
-    waves.push([...(BASE_WAVES[Math.min(i, BASE_WAVES.length - 1)] ?? [])]);
+  for (let i = 0; i < cfg.waveCount; i++) {
+    waves.push(generateWave(i));
   }
   return waves;
+}
+
+function generateWave(index: number): EnemyTypeKey[] {
+  const base = BASE_WAVES[Math.min(index, BASE_WAVES.length - 1)] ?? BASE_WAVES[BASE_WAVES.length - 1]!;
+  if (index < BASE_WAVES.length) return [...base];
+  const extra = Math.floor(index / 2);
+  const result: EnemyTypeKey[] = [...base];
+  for (let i = 0; i < extra; i++) {
+    const r = Math.random();
+    if (r < 0.3) result.push('goblin');
+    else if (r < 0.55) result.push('wolf');
+    else if (r < 0.8) result.push('tank');
+    else result.push('boss');
+  }
+  return result;
+}
+
+export function getWaveForEndless(_difficulty: DifficultyKey, waveIndex: number): EnemyTypeKey[] {
+  return generateWave(waveIndex);
 }
 
 export const SKILL_COST = 100;
@@ -151,16 +169,20 @@ export const SKILL_FREEZE_DURATION = 3000;
 export const SKILL_NUKE_DAMAGE = 200;
 export const SKILL_CD_MS = 15000;
 
+export type GameMode = 'campaign' | 'endless';
+
 export interface GameSettings {
   soundEnabled: boolean;
   difficulty: DifficultyKey;
   mapId: MapId;
+  mode: GameMode;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
   soundEnabled: true,
   difficulty: 'normal',
   mapId: 'default',
+  mode: 'campaign',
 };
 
 const STORAGE_KEY = 'td-game-settings';
@@ -170,7 +192,7 @@ export function loadSettings(): GameSettings {
     const s = localStorage.getItem(STORAGE_KEY);
     if (s) {
       const parsed = JSON.parse(s) as Partial<GameSettings>;
-      return { ...DEFAULT_SETTINGS, ...parsed };
+      return { ...DEFAULT_SETTINGS, ...parsed, mode: parsed.mode ?? 'campaign' };
     }
   } catch {}
   return { ...DEFAULT_SETTINGS };

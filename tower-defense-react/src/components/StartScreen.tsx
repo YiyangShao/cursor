@@ -30,6 +30,23 @@ export function StartScreen({ settings, onSettingsChange, onStart }: StartScreen
           </div>
 
           <div className="option-group">
+            <label>模式</label>
+            <div className="option-buttons">
+              <button
+                className={`option-btn ${settings.mode === 'campaign' ? 'active' : ''}`}
+                onClick={() => onSettingsChange({ ...settings, mode: 'campaign' })}
+              >
+                关卡
+              </button>
+              <button
+                className={`option-btn ${settings.mode === 'endless' ? 'active' : ''}`}
+                onClick={() => onSettingsChange({ ...settings, mode: 'endless' })}
+              >
+                无尽
+              </button>
+            </div>
+          </div>
+          <div className="option-group">
             <label>地图</label>
             <div className="option-buttons map-buttons">
               {Object.values(MAPS).map((m) => (

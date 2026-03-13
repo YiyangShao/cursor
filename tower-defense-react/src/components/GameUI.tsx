@@ -44,7 +44,7 @@ export function GameUI({
     !state.gameOver &&
     state.waveQueue === 0 &&
     state.aliveCount === 0 &&
-    state.wave < totalWaves;
+    (totalWaves === Infinity || state.wave < totalWaves);
 
   const nextWave = state.nextWave ?? [];
   const waveProgress =
@@ -60,7 +60,7 @@ export function GameUI({
           ❤️ {state.lives}
         </div>
         <div className="stat-item">
-          🌊 {state.wave}/{totalWaves}
+          🌊 {state.wave}/{totalWaves === Infinity ? '∞' : totalWaves}
           {state.waveQueue > 0 && (
             <span style={{ marginLeft: 4, opacity: 0.8 }}>
               ({state.totalInWave - state.waveQueue}/{state.totalInWave})

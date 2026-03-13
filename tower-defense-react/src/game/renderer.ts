@@ -33,6 +33,7 @@ export function render(
   drawProjectiles(ctx, game.projectiles);
   drawEnemies(ctx, game.getAliveEnemies());
   drawParticles(ctx, game.particles);
+  drawDamageTexts(ctx, game.damageTexts);
 }
 
 function drawBackground(ctx: CanvasRenderingContext2D): void {
@@ -279,6 +280,23 @@ function drawEnemies(ctx: CanvasRenderingContext2D, enemies: Enemy[]): void {
       (e.radius * 2 + 4) * pct,
       6
     );
+  }
+}
+
+function drawDamageTexts(ctx: CanvasRenderingContext2D, texts: { x: number; y: number; value: number; life: number; maxLife: number }[]): void {
+  for (const t of texts) {
+    const alpha = 1 - t.life / t.maxLife;
+    ctx.save();
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = `rgba(255, 230, 100, ${alpha})`;
+    ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.8})`;
+    ctx.lineWidth = 2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const str = `-${t.value}`;
+    ctx.strokeText(str, t.x, t.y);
+    ctx.fillText(str, t.x, t.y);
+    ctx.restore();
   }
 }
 
