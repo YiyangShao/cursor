@@ -1,28 +1,140 @@
-import { PATH_POINTS, GRID_CONFIG, isPathCell } from './path';
+import { getPathPoints, GRID_CONFIG, isPathCell, cellCenter, getMapDecorations, screenToCell } from './path';
 import type { Game } from './game';
 import type { Tower } from './tower';
 import type { Enemy } from './enemy';
 import type { Projectile } from './projectile';
 import type { Particle } from './particles';
+import { TOWER_TYPES, type TowerTypeKey } from './tower';
 
 const { CELL_SIZE, COLS, ROWS } = GRID_CONFIG;
 
+export interface HoverPreview {
+  col: number;
+  row: number;
+  towerType: TowerTypeKey;
+  canPlace: boolean;
+}
+
 export function render(
   ctx: CanvasRenderingContext2D,
-  game: Game
+  game: Game,
+  hoverPreview?: HoverPreview | null,
+  selectedCell?: { x: number; y: number } | null
 ): void {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+  drawBackground(ctx);
+  drawDecorations(ctx);
   drawGrid(ctx);
   drawPath(ctx);
+  if (hoverPreview) drawHoverPreview(ctx, hoverPreview, game.towers);
+  if (selectedCell) drawSelectedHighlight(ctx, game, selectedCell);
   drawTowers(ctx, game.towers);
   drawProjectiles(ctx, game.projectiles);
   drawEnemies(ctx, game.getAliveEnemies());
   drawParticles(ctx, game.particles);
 }
 
+function drawBackground(ctx: CanvasRenderingContext2D): void {
+  const grad = ctx.createLinearGradient(0, 0, 0, ROWS * CELL_SIZE);
+  grad.addColorStop(0, '#0f1419');
+  grad.addColorStop(0.5, '#0a0a12');
+  grad.addColorStop(1, '#0d0f14');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE);
+}
+
+function drawDecorations(ctx: CanvasRenderingContext2D): void {
+  const deco = getMapDecorations();
+  for (const d of deco) {
+    const x = d.col * CELL_SIZE + CELL_SIZE / 2;
+    const y = d.row * CELL_SIZE + CELL_SIZE / 2;
+    if (d.type === 'grass') {
+      ctx.fillStyle = 'rgba(60, 120, 60, 0.25)';
+      ctx.beginPath();
+      ctx.arc(x, y, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(100, 100, 110, 0.4)';
+      ctx.fillRect(d.col * CELL_SIZE + 4, d.row * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+    }
+  }
+}
+
+function drawHoverPreview(
+  ctx: CanvasRenderingContext2D,
+  preview: HoverPreview,
+  towers: Tower[]
+): void {
+  const cfg = TOWER_TYPES[preview.towerType];
+  if (!cfg) return;
+  const stats = cfg.base;
+  const { x, y } = cellCenter(preview.col, preview.row);
+  const occupied = towers.some(
+    (t) =>
+      Math.floor(t.x / CELL_SIZE) === preview.col &&
+      Math.floor(t.y / CELL_SIZE) === preview.row
+  );
+
+  ctx.save();
+  if (preview.canPlace && !occupied) {
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.6)';
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.15)';
+  } else {
+    ctx.strokeStyle = 'rgba(255, 82, 82, 0.6)';
+    ctx.fillStyle = 'rgba(255, 82, 82, 0.15)';
+  }
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, stats.range, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle =
+    preview.canPlace && !occupied ? cfg.color + '99' : cfg.color + '44';
+  ctx.strokeStyle =
+    preview.canPlace && !occupied
+      ? 'rgba(255,255,255,0.5)'
+      : 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, cfg.radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(cfg.icon, x, y);
+  ctx.restore();
+}
+
+function drawSelectedHighlight(
+  ctx: CanvasRenderingContext2D,
+  game: Game,
+  selected: { x: number; y: number }
+): void {
+  const cell = screenToCell(selected.x, selected.y);
+  if (!cell) return;
+  const tower = game.getTowerAt(selected.x, selected.y);
+  if (!tower) return;
+  const { x, y } = cellCenter(cell.col, cell.row);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 235, 59, 0.9)';
+  ctx.lineWidth = 3;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.arc(x, y, tower.range, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x, y, tower.radius + 4, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawGrid(ctx: CanvasRenderingContext2D): void {
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
   ctx.lineWidth = 1;
   for (let c = 0; c <= COLS; c++) {
     ctx.beginPath();
@@ -39,8 +151,11 @@ function drawGrid(ctx: CanvasRenderingContext2D): void {
 }
 
 function drawPath(ctx: CanvasRenderingContext2D): void {
-  ctx.strokeStyle = 'rgba(100, 150, 255, 0.4)';
-  ctx.lineWidth = 8;
+  const PATH_POINTS = getPathPoints();
+  if (PATH_POINTS.length < 2) return;
+
+  ctx.strokeStyle = 'rgba(100, 150, 255, 0.45)';
+  ctx.lineWidth = 10;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.beginPath();
@@ -50,49 +165,80 @@ function drawPath(ctx: CanvasRenderingContext2D): void {
   }
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(100, 150, 255, 0.15)';
-  ctx.strokeStyle = 'rgba(100, 150, 255, 0.3)';
+  ctx.fillStyle = 'rgba(100, 150, 255, 0.12)';
+  ctx.strokeStyle = 'rgba(100, 150, 255, 0.35)';
   ctx.lineWidth = 2;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (isPathCell(c, r)) {
-        ctx.fillRect(c * CELL_SIZE + 2, r * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-        ctx.strokeRect(c * CELL_SIZE + 2, r * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+        ctx.fillRect(
+          c * CELL_SIZE + 2,
+          r * CELL_SIZE + 2,
+          CELL_SIZE - 4,
+          CELL_SIZE - 4
+        );
+        ctx.strokeRect(
+          c * CELL_SIZE + 2,
+          r * CELL_SIZE + 2,
+          CELL_SIZE - 4,
+          CELL_SIZE - 4
+        );
       }
     }
   }
 
-  const end = PATH_POINTS[PATH_POINTS.length - 1];
-  ctx.fillStyle = 'rgba(255, 80, 80, 0.3)';
+  const start = PATH_POINTS[0];
+  ctx.fillStyle = 'rgba(100, 200, 255, 0.35)';
   ctx.beginPath();
-  ctx.arc(end.x, end.y, 20, 0, Math.PI * 2);
+  ctx.arc(start.x, start.y, 18, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255, 80, 80, 0.6)';
+  ctx.strokeStyle = 'rgba(100, 200, 255, 0.7)';
+  ctx.stroke();
+
+  const end = PATH_POINTS[PATH_POINTS.length - 1];
+  ctx.fillStyle = 'rgba(255, 80, 80, 0.35)';
+  ctx.beginPath();
+  ctx.arc(end.x, end.y, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 80, 80, 0.7)';
   ctx.stroke();
 }
 
 function drawTowers(ctx: CanvasRenderingContext2D, towers: Tower[]): void {
   for (const t of towers) {
+    ctx.save();
+    ctx.translate(t.x, t.y);
+    if (t.shootFlash > 0) {
+      ctx.shadowColor = t.color;
+      ctx.shadowBlur = 15 * t.shootFlash;
+    }
     const gradient = ctx.createRadialGradient(
-      t.x - 5, t.y - 5, 0,
-      t.x, t.y, t.radius + 5
+      -5, -5, 0,
+      0, 0, t.radius + 8
     );
     gradient.addColorStop(0, t.color);
-    gradient.addColorStop(1, adjustColor(t.color, 0.6));
-
+    gradient.addColorStop(1, adjustColor(t.color, 0.55));
     ctx.fillStyle = gradient;
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.65)';
     ctx.lineWidth = 2;
+    ctx.rotate(t.aimAngle);
     ctx.beginPath();
-    ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+    ctx.arc(0, 0, t.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-
+    ctx.rotate(-t.aimAngle);
+    ctx.shadowBlur = 0;
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(t.icon, t.x, t.y);
+    ctx.fillText(t.icon, 0, 0);
+    if (t.level > 1) {
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillText(`Lv${t.level}`, 0, t.radius + 8);
+    }
+    ctx.restore();
   }
 }
 
@@ -100,9 +246,9 @@ function drawProjectiles(ctx: CanvasRenderingContext2D, projectiles: Projectile[
   for (const p of projectiles) {
     ctx.fillStyle = p.splashRadius > 0 ? '#ff9800' : '#ffeb3b';
     ctx.shadowColor = p.splashRadius > 0 ? '#ff9800' : '#ffeb3b';
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.splashRadius > 0 ? 6 : 4, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.splashRadius > 0 ? 7 : 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
   }
@@ -113,26 +259,43 @@ function drawEnemies(ctx: CanvasRenderingContext2D, enemies: Enemy[]): void {
     const pos = e.getPosition();
     const pct = e.hp / e.maxHp;
     ctx.fillStyle = e.color;
-    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.65)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, e.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(pos.x - e.radius - 2, pos.y - e.radius - 10, e.radius * 2 + 4, 5);
+    ctx.fillRect(
+      pos.x - e.radius - 2,
+      pos.y - e.radius - 12,
+      e.radius * 2 + 4,
+      6
+    );
     ctx.fillStyle = pct > 0.5 ? '#4caf50' : pct > 0.25 ? '#ff9800' : '#f44336';
-    ctx.fillRect(pos.x - e.radius - 2, pos.y - e.radius - 10, (e.radius * 2 + 4) * pct, 5);
+    ctx.fillRect(
+      pos.x - e.radius - 2,
+      pos.y - e.radius - 12,
+      (e.radius * 2 + 4) * pct,
+      6
+    );
   }
 }
 
 function drawParticles(ctx: CanvasRenderingContext2D, particles: Particle[]): void {
   for (const p of particles) {
     const alpha = 1 - p.life / p.maxLife;
-    ctx.fillStyle = p.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+    const hex = p.color.startsWith('#')
+      ? p.color
+      : p.color.startsWith('rgb')
+        ? p.color.replace(')', `, ${alpha})`).replace('rgb', 'rgba')
+        : p.color;
+    ctx.fillStyle =
+      hex.startsWith('rgba') || hex.startsWith('rgb')
+        ? hex
+        : hex + Math.floor(alpha * 255).toString(16).padStart(2, '0');
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size * (1 - alpha * 0.5), 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, p.size * (1 - alpha * 0.4), 0, Math.PI * 2);
     ctx.fill();
   }
 }

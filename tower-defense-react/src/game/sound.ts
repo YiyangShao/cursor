@@ -1,13 +1,24 @@
 let audioCtx: AudioContext | null = null;
+let soundEnabled = true;
 
-function getContext(): AudioContext {
-  if (!audioCtx) audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-  return audioCtx;
+export function setSoundEnabled(enabled: boolean): void {
+  soundEnabled = enabled;
+}
+
+function getContext(): AudioContext | null {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    return audioCtx;
+  } catch {
+    return null;
+  }
 }
 
 export function playShoot(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -24,8 +35,10 @@ export function playShoot(): void {
 }
 
 export function playHit(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -42,8 +55,10 @@ export function playHit(): void {
 }
 
 export function playDeath(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -61,8 +76,10 @@ export function playDeath(): void {
 }
 
 export function playSplash(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
@@ -83,8 +100,10 @@ export function playSplash(): void {
 }
 
 export function playWaveStart(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -101,8 +120,10 @@ export function playWaveStart(): void {
 }
 
 export function playVictory(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     [523, 659, 784, 1047].forEach((freq, i) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -121,8 +142,10 @@ export function playVictory(): void {
 }
 
 export function playDefeat(): void {
+  if (!soundEnabled) return;
   try {
     const ctx = getContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);

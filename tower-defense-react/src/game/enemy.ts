@@ -10,6 +10,13 @@ export interface EnemyTypeConfig {
   radius: number;
 }
 
+export const ENEMY_LABELS: Record<EnemyTypeKey, string> = {
+  goblin: '哥布林',
+  wolf: '狼',
+  tank: '坦克',
+  boss: 'Boss',
+};
+
 export const ENEMY_TYPES: Record<EnemyTypeKey, EnemyTypeConfig> = {
   goblin: {
     hp: 100,
@@ -55,16 +62,16 @@ export class Enemy {
   alive: boolean;
   rewarded: boolean;
 
-  constructor(typeKey: EnemyTypeKey, id: number) {
+  constructor(typeKey: EnemyTypeKey, id: number, hpMult = 1, rewardMult = 1) {
     const config = ENEMY_TYPES[typeKey];
     if (!config) throw new Error(`Unknown enemy type: ${typeKey}`);
     this.type = typeKey;
     this.id = id;
-    this.maxHp = config.hp;
-    this.hp = config.hp;
+    this.maxHp = Math.floor(config.hp * hpMult);
+    this.hp = this.maxHp;
     this.baseSpeed = config.speed;
     this.speed = config.speed;
-    this.reward = config.reward;
+    this.reward = Math.floor(config.reward * rewardMult);
     this.color = config.color;
     this.radius = config.radius;
     this.progress = 0;

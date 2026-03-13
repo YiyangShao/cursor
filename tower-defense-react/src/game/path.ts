@@ -1,3 +1,5 @@
+import type { MapConfig } from './config';
+
 const CELL_SIZE = 60;
 const COLS = 15;
 const ROWS = 10;
@@ -7,23 +9,21 @@ export interface Point {
   y: number;
 }
 
-export const PATH_POINTS: Point[] = [
-  { x: 0, y: 3 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: 4 * CELL_SIZE + CELL_SIZE / 2, y: 3 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: 4 * CELL_SIZE + CELL_SIZE / 2, y: 6 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: 8 * CELL_SIZE + CELL_SIZE / 2, y: 6 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: 8 * CELL_SIZE + CELL_SIZE / 2, y: 3 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: 12 * CELL_SIZE + CELL_SIZE / 2, y: 3 * CELL_SIZE + CELL_SIZE / 2 },
-  { x: COLS * CELL_SIZE + 20, y: 3 * CELL_SIZE + CELL_SIZE / 2 },
-];
+let currentMap: MapConfig | null = null;
 
-const PATH_CELLS = new Set([
-  '0,3', '1,3', '2,3', '3,3', '4,3',
-  '4,4', '4,5', '4,6',
-  '5,6', '6,6', '7,6', '8,6',
-  '8,5', '8,4', '8,3',
-  '9,3', '10,3', '11,3', '12,3', '13,3', '14,3',
-]);
+export function setMap(map: MapConfig): void {
+  currentMap = map;
+}
+
+export function getPathPoints(): Point[] {
+  if (!currentMap) return [];
+  return currentMap.pathPoints;
+}
+
+export function isPathCell(col: number, row: number): boolean {
+  if (!currentMap) return false;
+  return currentMap.pathCells.includes(`${col},${row}`);
+}
 
 export const GRID_CONFIG = {
   CELL_SIZE,
@@ -32,10 +32,6 @@ export const GRID_CONFIG = {
   WIDTH: COLS * CELL_SIZE,
   HEIGHT: ROWS * CELL_SIZE,
 };
-
-export function isPathCell(col: number, row: number): boolean {
-  return PATH_CELLS.has(`${col},${row}`);
-}
 
 export function cellCenter(col: number, row: number): Point {
   return {
@@ -60,29 +56,35 @@ function segmentLength(a: Point, b: Point): number {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
-function getPathLength(): number {
+function getPathLength(points: Point[]): number {
   let len = 0;
-  for (let i = 0; i < PATH_POINTS.length - 1; i++) {
-    len += segmentLength(PATH_POINTS[i], PATH_POINTS[i + 1]);
+  for (let i = 0; i < points.length - 1; i++) {
+    len += segmentLength(points[i], points[i + 1]);
   }
   return len;
 }
 
 export function getPathPosition(progress: number): Point {
-  if (progress >= 1) return PATH_POINTS[PATH_POINTS.length - 1];
-  const totalLen = getPathLength();
+  const points = getPathPoints();
+  if (points.length === 0) return { x: 0, y: 0 };
+  if (progress >= 1) return points[points.length - 1];
+  const totalLen = getPathLength(points);
   const targetLen = progress * totalLen;
   let acc = 0;
-  for (let i = 0; i < PATH_POINTS.length - 1; i++) {
-    const segLen = segmentLength(PATH_POINTS[i], PATH_POINTS[i + 1]);
+  for (let i = 0; i < points.length - 1; i++) {
+    const segLen = segmentLength(points[i], points[i + 1]);
     if (acc + segLen >= targetLen) {
       const t = (targetLen - acc) / segLen;
       return {
-        x: PATH_POINTS[i].x + t * (PATH_POINTS[i + 1].x - PATH_POINTS[i].x),
-        y: PATH_POINTS[i].y + t * (PATH_POINTS[i + 1].y - PATH_POINTS[i].y),
+        x: points[i].x + t * (points[i + 1].x - points[i].x),
+        y: points[i].y + t * (points[i + 1].y - points[i].y),
       };
     }
     acc += segLen;
   }
-  return PATH_POINTS[PATH_POINTS.length - 1];
+  return points[points.length - 1];
+}
+
+export function getMapDecorations(): { col: number; row: number; type: 'grass' | 'stone' }[] {
+  return currentMap?.decorations ?? [];
 }

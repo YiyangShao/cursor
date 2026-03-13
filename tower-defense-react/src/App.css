@@ -1,32 +1,389 @@
 .game-container {
-  position: relative;
-  background: #0d0d1a;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  gap: 12px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.game-title {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+  background: linear-gradient(90deg, #00c853, #00b8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-icon {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  background: rgba(100, 150, 255, 0.25) !important;
+  border: 1px solid rgba(100, 150, 255, 0.5);
+}
+
+.btn-skill {
+  background: rgba(156, 39, 176, 0.4) !important;
+  border: 1px solid rgba(156, 39, 176, 0.7);
+}
+
+.btn-skill:hover:not(:disabled) {
+  box-shadow: 0 0 16px rgba(156, 39, 176, 0.5);
+}
+
+.start-screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 100%);
+}
+
+.start-content {
+  text-align: center;
+  padding: 32px;
+  max-width: 420px;
+}
+
+.start-title {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #00c853, #00b8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.start-subtitle {
+  color: #888;
+  margin-bottom: 28px;
+}
+
+.start-options {
+  margin-bottom: 24px;
+}
+
+.option-group {
+  margin-bottom: 20px;
+}
+
+.option-group label {
+  display: block;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.option-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.option-btn {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-btn:hover, .option-btn.active {
+  background: rgba(0, 200, 100, 0.2);
+  border-color: #00c853;
+}
+
+.btn-start {
+  padding: 14px 40px;
+  font-size: 1.1rem;
+}
+
+.tutorial-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 24px;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.tutorial-overlay > * {
+  pointer-events: auto;
+}
+
+.tutorial-card {
+  background: rgba(20, 20, 40, 0.95);
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 0 60px rgba(0, 150, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  max-width: 360px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-progress {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.tutorial-progress .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tutorial-progress .dot.done {
+  background: #00c853;
+}
+
+.tutorial-text {
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.tutorial-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.tower-detail-panel {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 40, 0.95);
+  border-radius: 12px;
+  padding: 16px 20px;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 220px;
+}
+
+.tower-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tower-detail-icon {
+  font-size: 1.5rem;
+}
+
+.tower-detail-name {
+  font-weight: 600;
+}
+
+.tower-detail-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+.tower-detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-danger {
+  background: rgba(255, 82, 82, 0.5) !important;
+  border-color: rgba(255, 82, 82, 0.8);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 90%;
+  min-width: 280px;
+}
+
+.modal h2 {
+  margin-bottom: 20px;
+}
+
+.modal-section {
+  margin-bottom: 16px;
+}
+
+.modal-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.modal-section select {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+}
+
+.modal-section.stats-preview {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.achievement-item {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  opacity: 0.5;
+}
+
+.achievement-item.unlocked {
+  opacity: 1;
+  background: rgba(0, 200, 100, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
 }
 
 .ui-panel {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0 16px;
-  gap: 24px;
+  gap: 16px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .stats {
   display: flex;
-  gap: 20px;
-  font-size: 1.1rem;
+  gap: 12px;
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
   font-weight: 600;
+  align-items: center;
 }
 
-.stats span {
-  padding: 4px 12px;
+.stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
   background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats .stat-item.lives-low {
+  border-color: rgba(255, 82, 82, 0.5);
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.wave-progress-wrap {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.wave-progress {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wave-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00c853, #00b8ff);
+  border-radius: 4px;
+  transition: width 0.2s;
+}
+
+.next-wave-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.next-wave-preview .preview-label {
+  color: #888;
+}
+
+.next-wave-preview .preview-icons {
+  display: flex;
+  gap: 2px;
+}
+
+.next-wave-preview .preview-icons span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 11px;
 }
 
 .tower-select {
@@ -36,35 +393,51 @@
 }
 
 .tower-btn {
-  padding: 8px 16px;
-  background: rgba(0, 150, 255, 0.2);
-  border: 2px solid rgba(0, 150, 255, 0.5);
+  position: relative;
+  padding: 8px 14px;
+  background: rgba(0, 150, 255, 0.15);
+  border: 2px solid rgba(0, 150, 255, 0.4);
   border-radius: 8px;
   color: #fff;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
 }
 
 .tower-btn:hover {
-  background: rgba(0, 150, 255, 0.35);
+  background: rgba(0, 150, 255, 0.3);
   transform: translateY(-2px);
 }
 
 .tower-btn.active {
-  background: rgba(0, 200, 100, 0.3);
+  background: rgba(0, 200, 100, 0.25);
   border-color: #00c853;
   box-shadow: 0 0 12px rgba(0, 200, 100, 0.3);
 }
 
+.tower-btn.insufficient:not(.active) {
+  opacity: 0.7;
+  border-color: rgba(255, 82, 82, 0.4);
+}
+
+.tower-btn .cost {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-left: 4px;
+}
+
+.tower-btn .cost.insufficient {
+  color: #ff5252;
+}
+
 .btn {
-  padding: 10px 24px;
+  padding: 10px 22px;
   background: linear-gradient(135deg, #00c853, #00a844);
   border: none;
   border-radius: 8px;
   color: #fff;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -80,12 +453,64 @@
   transform: none;
 }
 
+.game-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.path-legend {
+  flex-shrink: 0;
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.path-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.path-legend .legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.path-legend .legend-dot.start {
+  background: rgba(100, 200, 255, 0.8);
+}
+
+.path-legend .legend-dot.end {
+  background: rgba(255, 80, 80, 0.8);
+}
+
+.path-legend .legend-dot.build {
+  background: rgba(0, 200, 100, 0.5);
+}
+
 .canvas-wrap {
+  flex: 1;
+  min-height: 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a12;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .game-canvas {
-  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   background: #0a0a12;
   border-radius: 8px;
   cursor: crosshair;
@@ -98,17 +523,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
+  border-radius: 12px;
   z-index: 10;
 }
 
 .overlay-content {
   text-align: center;
   padding: 40px;
+  max-width: 90%;
 }
 
 .overlay-content h2 {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   margin-bottom: 16px;
   background: linear-gradient(90deg, #00c853, #00b8ff);
   -webkit-background-clip: text;
@@ -117,8 +543,34 @@
 }
 
 .overlay-content p {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   color: #aaa;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+}
+
+.overlay-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.overlay-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.achievement-badge {
+  padding: 4px 10px;
+  background: rgba(255, 200, 0, 0.2);
+  border-radius: 6px;
+  font-size: 0.85rem;
 }
 
 .overlay.victory .overlay-content h2 {
@@ -132,3 +584,4 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
