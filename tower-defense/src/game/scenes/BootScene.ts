@@ -24,10 +24,20 @@ export default class BootScene extends Phaser.Scene {
       progressBox.destroy();
     });
 
-    this.load.tilemapTiledJSON('level1', '/maps/level1.json');
+    const levelId = (this.game.config as { levelId?: string }).levelId ?? 'level1';
+    this.load.tilemapTiledJSON(levelId, `/maps/${levelId}.json`);
+    this.load.json(`${levelId}_config`, `/config/levels/${levelId}.json`);
+
+    // Audio: add when assets available
+    // this.load.audio('sfx_place', '/assets/audio/sfx_place.ogg');
+    // this.load.audio('sfx_kill', '/assets/audio/sfx_kill.ogg');
+    // this.load.audio('sfx_victory', '/assets/audio/sfx_victory.ogg');
+    // this.load.audio('sfx_defeat', '/assets/audio/sfx_defeat.ogg');
   }
 
   create() {
-    this.scene.start('Game');
+    const levelId = (this.game.config as { levelId?: string }).levelId ?? 'level1';
+    const levelConfig = this.cache.json.get(`${levelId}_config`);
+    this.scene.start('Game', { levelConfig });
   }
 }

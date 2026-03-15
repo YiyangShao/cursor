@@ -1,8 +1,9 @@
 interface MainMenuProps {
   onStart: () => void;
+  onSettings?: () => void;
 }
 
-export default function MainMenu({ onStart }: MainMenuProps) {
+export default function MainMenu({ onStart, onSettings }: MainMenuProps) {
   return (
     <div className="main-menu">
       <h1>保卫蛋糕</h1>
@@ -10,6 +11,15 @@ export default function MainMenu({ onStart }: MainMenuProps) {
       <button type="button" className="btn-start" onClick={onStart}>
         开始游戏
       </button>
+      {onSettings && (
+        <button
+          type="button"
+          className="btn-overlay btn-secondary"
+          onClick={onSettings}
+        >
+          设置
+        </button>
+      )}
     </div>
   );
 }
