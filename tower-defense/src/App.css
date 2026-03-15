@@ -1,0 +1,62 @@
+.app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+}
+
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px;
+}
+
+.main-menu h1 {
+  font-size: 48px;
+  margin: 0;
+  color: #f8e8d4;
+}
+
+.main-menu p {
+  color: #c4b5a0;
+  margin: 0;
+}
+
+.btn-start {
+  font-size: 20px;
+  padding: 16px 48px;
+  border-radius: 8px;
+  color: #1a1a2e;
+  background: #f4c88a;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-start:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(244, 200, 138, 0.4);
+}
+
+.btn-start:focus-visible {
+  outline: 2px solid #f4c88a;
+  outline-offset: 2px;
+}
+
+.game-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+}
+
+.game-wrapper #game-container {
+  display: block;
+}

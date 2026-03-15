@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import StartScreen from './StartScreen';
-import GameView from './GameView';
+import MainMenu from './ui/MainMenu';
+import GameCanvas from './GameCanvas';
+import './App.css';
 
-export default function App() {
-  const [started, setStarted] = useState(false);
+type Screen = 'menu' | 'game';
 
-  if (!started) {
-    return <StartScreen onStart={() => setStarted(true)} />;
-  }
-  return <GameView />;
+function App() {
+  const [screen, setScreen] = useState<Screen>('menu');
+
+  return (
+    <div className="app">
+      {screen === 'menu' && (
+        <MainMenu onStart={() => setScreen('game')} />
+      )}
+      {screen === 'game' && (
+        <GameCanvas />
+      )}
+    </div>
+  );
 }
+
+export default App;
