@@ -5,6 +5,7 @@
   align-items: center;
   justify-content: center;
   background: #1a1a2e;
+  transition: none;
 }
 
 .main-menu {
@@ -55,8 +56,20 @@
   align-items: center;
   justify-content: center;
   background: #1a1a2e;
+  overflow: hidden;
+  transition: none;
+  animation: none;
 }
 
 .game-wrapper #game-container {
   display: block;
+  transition: none;
+  animation: none;
+}
+
+/* 禁用 Phaser 注入的 scale 容器的过渡动画 */
+.game-wrapper canvas,
+.game-wrapper > div > div {
+  transition: none !important;
+  animation: none !important;
 }

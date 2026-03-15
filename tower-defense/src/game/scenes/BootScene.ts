@@ -24,8 +24,7 @@ export default class BootScene extends Phaser.Scene {
       progressBox.destroy();
     });
 
-    // Placeholder: load nothing for Phase 1
-    // this.load.image(...);
+    this.load.tilemapTiledJSON('level1', '/maps/level1.json');
   }
 
   create() {

@@ -1,0 +1,47 @@
+{
+  "compressionlevel": -1,
+  "height": 12,
+  "infinite": false,
+  "layers": [
+    {
+      "draworder": "topdown",
+      "id": 1,
+      "name": "path",
+      "objects": [
+        {
+          "id": 1,
+          "name": "enemy_path",
+          "polyline": [
+            { "x": 0, "y": 0 },
+            { "x": 1152, "y": 0 },
+            { "x": 1152, "y": 320 },
+            { "x": 0, "y": 320 },
+            { "x": 0, "y": 512 },
+            { "x": 1152, "y": 512 }
+          ],
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "x": 64,
+          "y": 64
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 2,
+  "nextobjectid": 2,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.12.0",
+  "tileheight": 64,
+  "tilesets": [],
+  "tilewidth": 64,
+  "type": "map",
+  "version": 1.0,
+  "width": 20
+}
